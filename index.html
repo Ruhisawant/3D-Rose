@@ -1,119 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
-		<style>
-			body {
-				margin: 0;
-				padding: 0;
-				overflow: hidden;
-			}
-			
-			.control-panel {
-				position: absolute;
-				top: 20px;
-				left: 20px;
-				width: 280px;
-				background-color: rgba(255, 255, 255, 0.8);
-				border-radius: 10px;
-				box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-				font-family: Arial, sans-serif;
-				z-index: 1000;
-			}
-			
-			.panel-header {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				padding: 10px 15px;
-				background-color: rgba(0, 0, 0, 0.05);
-				border-radius: 10px 10px 0 0;
-				font-weight: bold;
-			}
-			
-			.toggle-btn {
-				background: none;
-				border: none;
-				color: #555;
-				cursor: pointer;
-				padding: 5px;
-			}
-			
-			.controls-content {
-				padding: 10px 15px;
-				max-height: 80vh;
-				overflow-y: auto;
-			}
-			
-			.control-section {
-				margin-bottom: 20px;
-			}
-			
-			.section-title {
-				font-weight: bold;
-				margin-bottom: 10px;
-				color: #444;
-			}
-			
-			.slider-container {
-				margin-bottom: 10px;
-			}
-			
-			.slider-label {
-				margin-bottom: 5px;
-				font-size: 14px;
-			}
-			
-			.slider {
-				width: 100%;
-				margin: 5px 0;
-			}
-			
-			.checkbox-control {
-				margin: 8px 0;
-			}
-			
-			.radio-group {
-				display: flex;
-				flex-direction: column;
-				margin: 10px 0;
-			}
-			
-			.button-container {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 8px;
-				margin-top: 5px;
-			}
-			
-			.preset-button, .action-button {
-				padding: 8px 12px;
-				background-color: #f0f0f0;
-				border: 1px solid #ccc;
-				border-radius: 5px;
-				cursor: pointer;
-				font-size: 13px;
-				transition: background-color 0.2s;
-			}
-			
-			.preset-button:hover, .action-button:hover {
-				background-color: #e0e0e0;
-			}
-			
-			.action-button {
-				background-color: #4CAF50;
-				color: white;
-				border: none;
-			}
-			
-			.action-button:hover {
-				background-color: #45a049;
-			}
-		</style>
-	</head>
-
-	<body>
-		<script src="sketch.js"></script>
-	</body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Flower Visualization</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    canvas {
+      display: block;
+    }
+    
+    .control-panel {
+      position: absolute;
+      background-color: rgba(255, 255, 255, 0.85);
+      border-radius: 10px;
+      padding: 0;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      font-family: Arial, sans-serif;
+      max-width: 300px;
+      overflow: hidden;
+      z-index: 100;
+    }
+    
+    .panel-header {
+      background-color: #4a90e2;
+      color: white;
+      padding: 10px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+    }
+    
+    .toggle-btn {
+      background: rgba(255, 255, 255, 0.3);
+      border: none;
+      border-radius: 4px;
+      color: white;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    
+    .controls-content {
+      padding: 15px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    
+    .control-section {
+      margin-bottom: 20px;
+    }
+    
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    
+    .slider-container {
+      margin-bottom: 12px;
+    }
+    
+    .slider-label {
+      font-size: 0.85em;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    
+    .slider {
+      width: 100%;
+    }
+    
+    .radio-group {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .radio-group label {
+      margin: 5px 0;
+      font-size: 0.9em;
+    }
+    
+    .color-picker-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .preset-button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background-color 0.2s;
+    }
+    
+    .preset-button:hover {
+      background-color: #3a7bd5;
+    }
+  </style>
+</head>
+<body>
+  <script src="controls.js"></script>
+  <script src="sketch.js"></script>
+</body>
 </html>
