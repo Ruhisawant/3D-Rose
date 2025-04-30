@@ -17,7 +17,6 @@ let flowerParams = {
   pAlign: 3.6,
   curve1: 2,
   curve2: 1.3,
-  stemHeight: 10,
   stemCurve: 5,
   flowerSize: 260,
   leafCount: 3,
@@ -35,6 +34,12 @@ let canvas;
 // Custom color storage
 let customColor = {h: 340, s: 100, b: 70};
 
+// Store fixed random positions for leaves
+let leafRandomPositions = [];
+let leafRandomAngles = [];
+let leafRandomDirections = [];
+let leafRandomRotations = [];
+
 function setup() {
   canvas = createCanvas(windowWidth, windowHeight, WEBGL);
   canvas.id('canvas');
@@ -42,6 +47,17 @@ function setup() {
   colorMode(HSB);
   angleMode(DEGREES);
   noStroke();
+  
+  // Initialize random seed for consistent leaf positions
+  randomSeed(42);
+  
+  // Pre-generate random positions
+  for (let i = 0; i < 10; i++) {
+    leafRandomPositions[i] = floor(random(1, 10));
+    leafRandomAngles[i] = random(0, 360);
+    leafRandomDirections[i] = random() > 0.5 ? 1 : -1;
+    leafRandomRotations[i] = random(20, 40);
+  }
   
   setupControls();
 }
@@ -85,25 +101,17 @@ function setupControls() {
   createSliderControl(shapeSection, 'pAlign', 'Petal alignment', 0, 6, flowerParams.pAlign, 0.05, val => flowerParams.pAlign = val);
   createSliderControl(shapeSection, 'curve1', 'Curvature 1', -6, 6, flowerParams.curve1, 0.1, val => flowerParams.curve1 = val);
   createSliderControl(shapeSection, 'curve2', 'Curvature 2', 0.5, 1.5, flowerParams.curve2, 0.1, val => flowerParams.curve2 = val);
-  createSliderControl(shapeSection, 'flowerSize', 'Flower size', 100, 500, flowerParams.flowerSize, 10, val => flowerParams.flowerSize = val);
-  
-  // Stem controls
-  let stemSection = createDiv();
-  stemSection.class('control-section');
-  stemSection.parent(controlsContent);
-  createDiv('Stem Properties').class('section-title').parent(stemSection);
-  
-  createSliderControl(stemSection, 'stemHeight', 'Stem height', 5, 20, flowerParams.stemHeight, 1, val => flowerParams.stemHeight = val);
-  
-  // Fixed Leaf controls
+  createSliderControl(shapeSection, 'flowerSize', 'Flower size', 150, 400, flowerParams.flowerSize, 10, val => flowerParams.flowerSize = val);
+    
+  // Leaf controls
   let leafSection = createDiv();
   leafSection.class('control-section');
   leafSection.parent(controlsContent);
   createDiv('Leaf Properties').class('section-title').parent(leafSection);
   
-  createSliderControl(leafSection, 'leafCount', 'Leaf count', 0, 10, flowerParams.leafCount, 1, val => flowerParams.leafCount = parseInt(val));
-  createSliderControl(leafSection, 'leafHeight', 'Leaf height', 0.5, 2.0, flowerParams.leafHeight, 0.1, val => flowerParams.leafHeight = val);
-  createSliderControl(leafSection, 'leafWidth', 'Leaf width', 0.5, 2.0, flowerParams.leafWidth, 0.1, val => flowerParams.leafWidth = val);
+  createSliderControl(leafSection, 'leafCount', 'Leaf count', 0, 7, flowerParams.leafCount, 1, val => flowerParams.leafCount = parseInt(val));
+  createSliderControl(leafSection, 'leafHeight', 'Leaf height', 0.5, 4.0, flowerParams.leafHeight, 0.1, val => flowerParams.leafHeight = val);
+  createSliderControl(leafSection, 'leafWidth', 'Leaf width', 0.5, 4.0, flowerParams.leafWidth, 0.1, val => flowerParams.leafWidth = val);
   
   // Color controls
   let colorSection = createDiv();
@@ -152,7 +160,6 @@ function setupControls() {
     pAlign: 3.6, 
     curve1: 2, 
     curve2: 1.3,
-    stemHeight: 10,
     flowerSize: 260,
     colorMode: 'pink',
     leafCount: 3,
@@ -166,7 +173,6 @@ function setupControls() {
     pAlign: 4.6, 
     curve1: 5.5, 
     curve2: 0.7,
-    stemHeight: 10,
     flowerSize: 300,
     colorMode: 'custom',
     customColor: {h: 60, s: 100, b: 70},
@@ -181,7 +187,6 @@ function setupControls() {
     pAlign: 4.5, 
     curve1: 0, 
     curve2: 1.1,
-    stemHeight: 10,
     flowerSize: 240,
     colorMode: 'custom',
     customColor: {h: 0, s: 100, b: 70},
@@ -249,11 +254,9 @@ function createPresetButton(parent, name, params) {
 
 function draw() {
 	clear();
-	// background(200, 70, 60);
   drawGradientBackground();
   
   push();
-	// perspective();
   rotateX(cameraRotationX);
   rotateY(cameraRotationY);
   if (autoRotate) {
@@ -320,28 +323,22 @@ function drawStem() {
   push();
   fill(120, 250, 60);
   
-  let segments = flowerParams.stemHeight;
+  let segments = 10;  
   let segmentHeight = 80;
-    
+  
   for (let i = 0; i < segments; i++) {
     push();
-    // Calculate stem curve
     let xOffset = sin(i * (30 / segments));
     translate(xOffset, i * segmentHeight);
     
-    // Make the stem thinner at the top
-    let stemWidth = map(i, 0, segments, 5, 12);
+    let stemWidth = map(i, 0, segments, 7, 15);
     cylinder(stemWidth, segmentHeight);
     
-    // Add leaves based on leaf count parameter
-    if (i > 0 && i < segments - 2) {
-      // Calculate how many leaves to show based on leafCount parameter
-      let leafFrequency = max(1, floor(segments / max(1, flowerParams.leafCount)));
-      if (flowerParams.leafCount > 0 && i % leafFrequency === 0 && i / leafFrequency < flowerParams.leafCount) {
-        drawLeaf(segmentHeight, i);
+    for (let j = 0; j < flowerParams.leafCount; j++) {
+      if (leafRandomPositions[j] === i) {
+        drawLeaf(segmentHeight, j);
       }
     }
-    
     pop();
   }
   pop();
@@ -351,30 +348,31 @@ function drawLeaf(segmentHeight, index) {
   push();
   fill(120, 230, 50);
   
-  // Alternate leaf direction
-  let direction = (index % 2 === 0) ? 1 : -1;
+  let angle = leafRandomAngles[index];
+  let direction = leafRandomDirections[index];
+  let rotation = leafRandomRotations[index];
   
-  // Position the leaf
-  rotateX(70);
-  rotateY(direction * 90);
+  rotateX(0);
+  rotateY(angle);
   
-  // Apply leaf size parameter
-  let leafLength = segmentHeight * 0.8 * flowerParams.leafHeight;
-  let leafWidth = segmentHeight * 0.2 * flowerParams.leafWidth;
+  let leafLength = segmentHeight * 1.7 * flowerParams.leafHeight;
+  let leafWidth = segmentHeight * 0.6 * flowerParams.leafWidth;  
   
-  // Draw a simple leaf shape
+  // Add Z rotation using pre-calculated value
+  rotateZ(rotation * direction);
+  
   beginShape();
   for (let i = 0; i <= 10; i++) {
     let t = i / 10;
     let leafX = direction * leafLength * t;
-    let leafY = 0;
+    let leafY = -leafLength * 0.2 * sin(t * 90);
     let leafZ = leafWidth * sin(t * 180);
     vertex(leafX, leafY, leafZ);
   }
   for (let i = 10; i >= 0; i--) {
     let t = i / 10;
     let leafX = direction * leafLength * t;
-    let leafY = 0;
+    let leafY = -leafLength * 0.2 * sin(t * 90);
     let leafZ = -leafWidth * sin(t * 180);
     vertex(leafX, leafY, leafZ);
   }
@@ -385,7 +383,7 @@ function drawLeaf(segmentHeight, index) {
 
 function drawGradientBackground() {
   push();
-	
+
   resetMatrix();
   translate(0, 0, -1000);
   
