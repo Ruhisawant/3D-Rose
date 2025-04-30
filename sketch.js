@@ -4,7 +4,7 @@ let cols = 600, rows = 30;
 let t_D = 180 * 15 / cols;
 let r_D = 1 / rows;
 
-// Flower parameters (will be managed by controls.js)
+// Flower parameters
 let flowerParams = {
   opening: 2,
   vDensity: 8,
@@ -22,7 +22,10 @@ let flowerParams = {
 let cameraDistance = 800;
 let cameraRotationX = -30;
 let cameraRotationY = 0;
-let autoRotate = true;
+let autoRotate = false;
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
 let canvas;
 
 // Custom color storage
@@ -42,19 +45,45 @@ function setup() {
   angleMode(DEGREES);
   noStroke();
   
-  // Initialize random seed for consistent leaf positions
   randomSeed(42);
   
-  // Pre-generate random positions
   for (let i = 0; i < 10; i++) {
-    leafRandomPositions[i] = floor(random(1, 10));
-    leafRandomAngles[i] = random(0, 360);
-    leafRandomDirections[i] = random() > 0.5 ? 1 : -1;
-    leafRandomRotations[i] = random(20, 40);
+    leafRandomPositions[i] = i * 2;
+    leafRandomAngles[i] = i * 36;
+    leafRandomDirections[i] = i % 2 === 0 ? 1 : -1;
+    leafRandomRotations[i] = 20 + i * 2;
   }
   
-  // Initialize controls from the controls.js file
   setupControls();
+
+  canvas.mousePressed(onMousePressed);
+  canvas.mouseReleased(onMouseReleased);
+  canvas.mouseMoved(onMouseMoved);
+}
+
+function onMousePressed() {
+  isDragging = true;
+  lastMouseX = mouseX;
+  lastMouseY = mouseY;
+}
+
+function onMouseReleased() {
+  isDragging = false;
+}
+
+function onMouseMoved() {
+  if (isDragging && !autoRotate) {
+    let deltaX = mouseX - lastMouseX;
+    let deltaY = mouseY - lastMouseY;
+    
+    cameraRotationY += deltaX * 0.5;
+    cameraRotationX -= deltaY * 0.5;
+    
+    cameraRotationX = constrain(cameraRotationX, -90, 90);
+    
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
+  }
 }
 
 function draw() {
@@ -66,8 +95,6 @@ function draw() {
   rotateY(cameraRotationY);
   if (autoRotate) {
     cameraRotationY = (cameraRotationY + 0.2) % 360;
-  } else {
-    orbitControl(4, 4);
   }
   
   generateFlowerGeometry();
@@ -129,19 +156,35 @@ function drawStem() {
   fill(120, 250, 60);
   
   let segments = 10;  
-  let segmentHeight = 80;
+  let segmentHeight = 45;
+  let placedLeaves = new Set();
   
   for (let i = 0; i < segments; i++) {
     push();
-    let xOffset = sin(i * (30 / segments));
-    translate(xOffset, i * segmentHeight);
+    let xOffset = sin(i * (20 / segments)) * 15;
+    let zOffset = cos(i * (15 / segments)) * 10;
     
-    let stemWidth = map(i, 0, segments, 7, 15);
+    translate(xOffset, i * segmentHeight, zOffset);
+    
+    let stemBrightness = map(i, 0, segments, 40, 50);
+    fill(120, 250, stemBrightness);
+    
+    let stemWidth = map(i, 0, segments, 6, 18);
     cylinder(stemWidth, segmentHeight);
     
     for (let j = 0; j < flowerParams.leafCount; j++) {
       if (leafRandomPositions[j] === i) {
         drawLeaf(segmentHeight, j);
+        placedLeaves.add(j);
+      }
+    }
+    
+    if (i >= 5 && i <= 15) {
+      for (let j = 0; j < flowerParams.leafCount; j++) {
+        if (!placedLeaves.has(j) && (i % 3 === j % 3)) {
+          drawLeaf(segmentHeight, j);
+          placedLeaves.add(j);
+        }
       }
     }
     pop();
@@ -151,7 +194,6 @@ function drawStem() {
 
 function drawLeaf(segmentHeight, index) {
   push();
-  fill(120, 230, 50);
   
   let angle = leafRandomAngles[index];
   let direction = leafRandomDirections[index];
@@ -163,26 +205,31 @@ function drawLeaf(segmentHeight, index) {
   let leafLength = segmentHeight * 1.7 * flowerParams.leafHeight;
   let leafWidth = segmentHeight * 0.6 * flowerParams.leafWidth;  
   
-  // Add Z rotation using pre-calculated value
   rotateZ(rotation * direction);
   
-  beginShape();
+  beginShape(TRIANGLE_STRIP);
   for (let i = 0; i <= 10; i++) {
     let t = i / 10;
+    
+    let leafBrightness = map(t, 0, 1, 50, 30);
+    let leafSaturation = map(t, 0, 1, 200, 240);
+    fill(120, leafSaturation, leafBrightness);
+    
+    let tipCurve = 0;
+    if (t > 0.7) {
+      tipCurve = map(t, 0.7, 1, 0, leafLength * 0.2);
+    }
+    
     let leafX = direction * leafLength * t;
-    let leafY = -leafLength * 0.2 * sin(t * 90);
+    let leafY = -tipCurve;
     let leafZ = leafWidth * sin(t * 180);
+
     vertex(leafX, leafY, leafZ);
-  }
-  for (let i = 10; i >= 0; i--) {
-    let t = i / 10;
-    let leafX = direction * leafLength * t;
-    let leafY = -leafLength * 0.2 * sin(t * 90);
-    let leafZ = -leafWidth * sin(t * 180);
-    vertex(leafX, leafY, leafZ);
+    
+    fill(120, leafSaturation, leafBrightness - 5);
+    vertex(leafX, leafY + 1, -leafZ);
   }
   endShape(CLOSE);
-  
   pop();
 }
 
