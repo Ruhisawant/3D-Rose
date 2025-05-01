@@ -132,12 +132,23 @@ function drawFlowerPetals() {
         case 'rainbow':
           fill((theta * t_D) % 360, 100, 70 + r * r_D * 30);
           break;
-        case 'custom':
-          fill(customColor.h, customColor.s, -20 + r * r_D * 120);
+				case 'funky':
+          fill((theta * t_D + r * 30) % 360, 100, 70 + r * r_D * 30);
           break;
-        case 'pink':
+        case 'custom':
+          if (customColor.b === 0) {
+            let minimalBrightnessAdjust = r * r_D * 15;
+            fill(0, 0, minimalBrightnessAdjust);
+          } else {
+            let brightnessAdjustment = r * r_D * 50;
+            let finalBrightness = customColor.b * 0.5 + brightnessAdjustment;
+            finalBrightness = constrain(finalBrightness, 0, 100);
+            fill(customColor.h, customColor.s, finalBrightness);
+          }
+          break;
         default:
-          fill(340, 100, -20 + r * r_D * 120);
+          // Fallback to rainbow in case of undefined color mode
+          fill((theta * t_D) % 360, 100, 70 + r * r_D * 30);
           break;
       }
       
@@ -159,6 +170,7 @@ function drawStem() {
   let segmentHeight = 45;
   let placedLeaves = new Set();
   
+  // First pass: place leaves at specific positions
   for (let i = 0; i < segments; i++) {
     push();
     let xOffset = sin(i * (20 / segments)) * 15;
@@ -172,6 +184,7 @@ function drawStem() {
     let stemWidth = map(i, 0, segments, 6, 18);
     cylinder(stemWidth, segmentHeight);
     
+    // Only place leaves at their specific positions in this pass
     for (let j = 0; j < flowerParams.leafCount; j++) {
       if (leafRandomPositions[j] === i) {
         drawLeaf(segmentHeight, j);
@@ -179,16 +192,26 @@ function drawStem() {
       }
     }
     
-    if (i >= 5 && i <= 15) {
-      for (let j = 0; j < flowerParams.leafCount; j++) {
-        if (!placedLeaves.has(j) && (i % 3 === j % 3)) {
-          drawLeaf(segmentHeight, j);
-          placedLeaves.add(j);
-        }
-      }
-    }
     pop();
   }
+  
+  // Second pass: place remaining leaves
+  // We'll only do this for leaves that weren't placed in the first pass
+  for (let j = 0; j < flowerParams.leafCount; j++) {
+    if (!placedLeaves.has(j)) {
+      // Find an appropriate segment for this leaf
+      let segmentIdx = 5 + j % 3; // Space them out between segments 5-7
+      
+      push();
+      let xOffset = sin(segmentIdx * (20 / segments)) * 15;
+      let zOffset = cos(segmentIdx * (15 / segments)) * 10;
+      
+      translate(xOffset, segmentIdx * segmentHeight, zOffset);
+      drawLeaf(segmentHeight, j);
+      pop();
+    }
+  }
+  
   pop();
 }
 
