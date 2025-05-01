@@ -1,18 +1,17 @@
 // UI controls
-let controls = {};
-let isControlsVisible = true;
-let colorMode1, colorMode2;
-let colorPicker;
+let controls = {}
+let isControlPanelVisible = true
+let colorModeSelector, colorPicker
 
 // Store preset configurations
-const presets = {
+const flowerPresets = {
   rose: {
-    opening: 2, 
-    vDensity: 8, 
-    pAlign: 3.6, 
-    curve1: 2, 
-    curve2: 1.3,
-    flowerSize: 260,
+    openingAngle: 2, 
+    verticalDensity: 8, 
+    petalAlignment: 3.6, 
+    innerCurve: 2, 
+    outerCurve: 1.3,
+    petalSize: 260,
     colorMode: 'custom',
     customColor: {h: 340, s: 100, b: 70},
     leafCount: 3,
@@ -20,12 +19,12 @@ const presets = {
     leafWidth: 1.0
   },
   tulip: {
-    opening: 9, 
-    vDensity: 13.5, 
-    pAlign: 4.6, 
-    curve1: 5.5, 
-    curve2: 0.7,
-    flowerSize: 300,
+    openingAngle: 9, 
+    verticalDensity: 13.5, 
+    petalAlignment: 4.6, 
+    innerCurve: 5.5, 
+    outerCurve: 0.7,
+    petalSize: 300,
     colorMode: 'custom',
     customColor: {h: 282, s: 85, b: 96},
     leafCount: 2,
@@ -33,213 +32,207 @@ const presets = {
     leafWidth: 0.8
   },
   carnation: {
-    opening: 1.5, 
-    vDensity: 12, 
-    pAlign: 4.5, 
-    curve1: 0, 
-    curve2: 1.1,
-    flowerSize: 240,
+    openingAngle: 1.5, 
+    verticalDensity: 12, 
+    petalAlignment: 4.5, 
+    innerCurve: 0, 
+    outerCurve: 1.1,
+    petalSize: 240,
     colorMode: 'custom',
     customColor: {h: 51, s: 85, b: 91},
     leafCount: 4,
     leafHeight: 0.8,
     leafWidth: 1.3
   }
-};
+}
 
-function setupControls() {
-  // Main container for controls
-  let controlPanel = createDiv();
-  controlPanel.id('controlPanel');
-  controlPanel.position(20, 20);
-  controlPanel.class('control-panel');
+function setupControlPanel() {
+  let controlPanel = createDiv()
+  controlPanel.id('controlPanel')
+  controlPanel.position(20, 20)
+  controlPanel.class('control-panel')
   
-  // Header with title and toggle button
-  let header = createDiv('Flower Controls');
-  header.class('panel-header');
-  header.parent(controlPanel);
+  let panelHeader = createDiv('Flower Controls')
+  panelHeader.class('panel-header')
+  panelHeader.parent(controlPanel)
   
-  let toggleBtn = createButton('Hide');
-  toggleBtn.class('toggle-btn');
-  toggleBtn.parent(header);
+  let toggleBtn = createButton('Hide')
+  toggleBtn.class('toggle-btn')
+  toggleBtn.parent(panelHeader)
   toggleBtn.mousePressed(() => {
-    let panel = select('#controlsContent');
-    isControlsVisible = !isControlsVisible;
-    panel.style('display', isControlsVisible ? 'block' : 'none');
-    toggleBtn.html(isControlsVisible ? 'Hide' : 'Show');
-  });
+    let panel = select('#controlsContent')
+    isControlPanelVisible = !isControlPanelVisible
+    panel.style('display', isControlPanelVisible ? 'block' : 'none')
+    toggleBtn.html(isControlPanelVisible ? 'Hide' : 'Show')
+  })
   
   // Container for actual controls
-  let controlsContent = createDiv();
-  controlsContent.id('controlsContent');
-  controlsContent.class('controls-content');
-  controlsContent.parent(controlPanel);
+  let controlsContent = createDiv()
+  controlsContent.id('controlsContent')
+  controlsContent.class('controls-content')
+  controlsContent.parent(controlPanel)
   
   // Flower shape controls
-  let shapeSection = createDiv();
-  shapeSection.class('control-section');
-  shapeSection.parent(controlsContent);
-  createDiv('Flower Shape').class('section-title').parent(shapeSection);
+  let shapeSection = createDiv()
+  shapeSection.class('control-section')
+  shapeSection.parent(controlsContent)
+  createDiv('Flower Shape').class('section-title').parent(shapeSection)
   
-  createSliderControl(shapeSection, 'opening', 'Flower opening', 1, 10, flowerParams.opening, 0.1, val => flowerParams.opening = val);
-  createSliderControl(shapeSection, 'vDensity', 'Vertical density', 1, 20, flowerParams.vDensity, 0.1, val => flowerParams.vDensity = val);
-  createSliderControl(shapeSection, 'pAlign', 'Petal alignment', 0, 6, flowerParams.pAlign, 0.05, val => flowerParams.pAlign = val);
-  createSliderControl(shapeSection, 'innerCurve', 'Inner Curve', -6, 6, flowerParams.curve1, 0.1, val => flowerParams.curve1 = val);
-  createSliderControl(shapeSection, 'outerCurve', 'Outer Curve', 0.5, 1.5, flowerParams.curve2, 0.1, val => flowerParams.curve2 = val);
-  createSliderControl(shapeSection, 'flowerSize', 'Flower size', 150, 400, flowerParams.flowerSize, 10, val => flowerParams.flowerSize = val);
+  createSliderControl(shapeSection, 'openingAngle', 'Flower Opening', 1, 10, flowerConfig.openingAngle, 0.1, val => flowerConfig.openingAngle = val)
+  createSliderControl(shapeSection, 'verticalDensity', 'Vertical Density', 1, 20, flowerConfig.verticalDensity, 0.1, val => flowerConfig.verticalDensity = val)
+  createSliderControl(shapeSection, 'petalAlignment', 'Petal Alignment', 0, 6, flowerConfig.petalAlignment, 0.05, val => flowerConfig.petalAlignment = val)
+  createSliderControl(shapeSection, 'innerCurve', 'Inner Curve', -6, 6, flowerConfig.innerCurve, 0.1, val => flowerConfig.innerCurve = val)
+  createSliderControl(shapeSection, 'outerCurve', 'Outer Curve', 0.5, 1.5, flowerConfig.outerCurve, 0.1, val => flowerConfig.outerCurve = val)
+  createSliderControl(shapeSection, 'petalSize', 'Petal Size', 150, 400, flowerConfig.petalSize, 10, val => flowerConfig.petalSize = val)
   
   // Leaf controls
-  let leafSection = createDiv();
-  leafSection.class('control-section');
-  leafSection.parent(controlsContent);
-  createDiv('Leaf Properties').class('section-title').parent(leafSection);
+  let leafSection = createDiv()
+  leafSection.class('control-section')
+  leafSection.parent(controlsContent)
+  createDiv('Leaf Properties').class('section-title').parent(leafSection)
   
-  createSliderControl(leafSection, 'leafCount', 'Leaf count', 0, 5, flowerParams.leafCount, 1, val => flowerParams.leafCount = parseInt(val));
-  createSliderControl(leafSection, 'leafHeight', 'Leaf height', 0.5, 4.0, flowerParams.leafHeight, 0.1, val => flowerParams.leafHeight = val);
-  createSliderControl(leafSection, 'leafWidth', 'Leaf width', 0.5, 4.0, flowerParams.leafWidth, 0.1, val => flowerParams.leafWidth = val);
+  createSliderControl(leafSection, 'leafCount', 'Leaf Count', 0, 5, flowerConfig.leafCount, 1, val => flowerConfig.leafCount = parseInt(val))
+  createSliderControl(leafSection, 'leafHeight', 'Leaf Height', 0.5, 4.0, flowerConfig.leafHeight, 0.1, val => flowerConfig.leafHeight = val)
+  createSliderControl(leafSection, 'leafWidth', 'Leaf Width', 0.5, 4.0, flowerConfig.leafWidth, 0.1, val => flowerConfig.leafWidth = val)
   
   // Color controls
-  let colorSection = createDiv();
-  colorSection.class('control-section');
-  colorSection.parent(controlsContent);
-  createDiv('Color Options').class('section-title').parent(colorSection);
+  let colorSection = createDiv()
+  colorSection.class('control-section')
+  colorSection.parent(controlsContent)
+  createDiv('Color Options').class('section-title').parent(colorSection)
   
   // Create color mode radio buttons
-  let radioContainer = createDiv();
-  radioContainer.class('radio-container');
-  radioContainer.parent(colorSection);
+  let radioContainer = createDiv()
+  radioContainer.class('radio-container')
+  radioContainer.parent(colorSection)
   
-  colorMode1 = createRadio();
-  colorMode1.parent(radioContainer);
-  colorMode1.class('radio-group');
-  colorMode1.option('rainbow', 'Rainbow');
-  colorMode1.option('funky', 'Funky');
-  colorMode1.option('custom', 'Custom Color');
-  colorMode1.selected('custom');
+  colorModeSelector = createRadio()
+  colorModeSelector.parent(radioContainer)
+  colorModeSelector.class('radio-group')
+  colorModeSelector.option('rainbow', 'Rainbow')
+  colorModeSelector.option('funky', 'Funky')
+  colorModeSelector.option('custom', 'Custom Color')
+  colorModeSelector.selected('custom')
   
   // Make the radio labels clickable
-  let radioItems = selectAll('input[type="radio"]', radioContainer.elt);
-  let radioLabels = selectAll('label', radioContainer.elt);
+  let radioItems = selectAll('input[type="radio"]', radioContainer.elt)
+  let radioLabels = selectAll('label', radioContainer.elt)
   
   for (let i = 0; i < radioLabels.length; i++) {
     radioLabels[i].mousePressed(function() {
       radioItems[i].checked = true;
-      colorMode1.value(radioItems[i].value);
-    });
+      colorModeSelector.value(radioItems[i].value)
+    })
   }
   
   // Color picker
-  let pickerContainer = createDiv();
-  pickerContainer.class('color-picker-container');
-  pickerContainer.parent(colorSection);
-  let colorPickerLabel = createDiv('Custom Color:');
-  colorPickerLabel.class('slider-label');
-  colorPickerLabel.parent(pickerContainer);
-  colorPickerLabel.mousePressed(() => {
-    colorMode1.selected('custom');
-  });
+  let colorPickerContainer = createDiv()
+  colorPickerContainer.class('color-picker-container')
+  colorPickerContainer.parent(colorSection)
 
-  colorPicker = createColorPicker(color(340, 100, 70, 1));
-  colorPicker.parent(pickerContainer);
-  colorPicker.class('color-picker');
+  let colorPickerLabel = createDiv('Custom Color:')
+  colorPickerLabel.class('slider-label')
+  colorPickerLabel.parent(colorPickerContainer)
+  colorPickerLabel.mousePressed(() => {
+    colorModeSelector.selected('custom')
+  })
+
+  colorPicker = createColorPicker(color(340, 100, 70, 1))
+  colorPicker.parent(colorPickerContainer)
+  colorPicker.class('color-picker')
   colorPicker.input(() => {
-    let c = colorPicker.color();
-    customColor.h = hue(c);
-    customColor.s = saturation(c);
-    customColor.b = brightness(c);
+    let c = colorPicker.color()
+    customColor.h = hue(c)
+    customColor.s = saturation(c)
+    customColor.b = brightness(c)
     
     if (customColor.b < 5) {
       customColor.b = brightness(c);
     }
-    
-    colorMode1.selected('custom');
-  });
 
-  pickerContainer.mousePressed(() => {
-    colorMode1.selected('custom');
-  });
-    
+    colorModeSelector.selected('custom')
+  })
+
+  colorPickerContainer.mousePressed(() => {
+    colorModeSelector.selected('custom')
+  })
+  
   // Preset buttons
-  let presetSection = createDiv();
-  presetSection.class('control-section');
-  presetSection.parent(controlsContent);
-  createDiv('Presets').class('section-title').parent(presetSection);
+  let presetSection = createDiv()
+  presetSection.class('control-section')
+  presetSection.parent(controlsContent)
+  createDiv('Presets').class('section-title').parent(presetSection)
   
-  let presetButtonContainer = createDiv();
-  presetButtonContainer.class('button-container');
-  presetButtonContainer.parent(presetSection);
+  let presetButtonContainer = createDiv()
+  presetButtonContainer.class('button-container')
+  presetButtonContainer.parent(presetSection)
   
-  createPresetButton(presetButtonContainer, 'Rose', presets.rose);
-  createPresetButton(presetButtonContainer, 'Tulip', presets.tulip);
-  createPresetButton(presetButtonContainer, 'Carnation', presets.carnation);
+  createPresetButton(presetButtonContainer, 'Rose', flowerPresets.rose)
+  createPresetButton(presetButtonContainer, 'Tulip', flowerPresets.tulip)
+  createPresetButton(presetButtonContainer, 'Carnation', flowerPresets.carnation)
 }
 
 function createSliderControl(parent, id, label, min, max, value, step, callback) {
-  let container = createDiv();
-  container.class('slider-container');
-  container.parent(parent);
+  let sliderContainer = createDiv()
+  sliderContainer.class('slider-container')
+  sliderContainer.parent(parent)
   
-  let labelDiv = createDiv(label + ': ' + value);
-  labelDiv.class('slider-label');
-  labelDiv.id(id + 'Label');
-  labelDiv.parent(container);
+  let labelDiv = createDiv(label + ': ' + value)
+  labelDiv.class('slider-label')
+  labelDiv.id(id + 'Label')
+  labelDiv.parent(sliderContainer)
   
-  let slider = createSlider(min, max, value, step);
-  slider.class('slider');
-  slider.parent(container);
+  let slider = createSlider(min, max, value, step)
+  slider.class('slider')
+  slider.parent(sliderContainer)
   slider.input(() => {
-    let val = slider.value();
-    select('#' + id + 'Label').html(label + ': ' + val);
-    if (callback) callback(val);
-  });
+    let val = slider.value()
+    select('#' + id + 'Label').html(label + ': ' + val)
+    if (callback) callback(val)
+  })
   
   controls[id] = {
     slider: slider,
     label: labelDiv
-  };
+  }
   
-  return slider;
+  return slider
 }
 
 function applyPreset(params) {
-  // Apply preset parameters
   for (let key in params) {
-    if (flowerParams.hasOwnProperty(key)) {
-      flowerParams[key] = params[key];
+    if (flowerConfig.hasOwnProperty(key)) {
+      flowerConfig[key] = params[key]
     }
   }
   
-  // Apply custom color if specified
   if (params.customColor && params.colorMode === 'custom') {
-    customColor = { ...params.customColor };
+    customColor = { ...params.customColor }
   }
 }
 
 function createPresetButton(parent, name, params) {
-  let btn = createButton(name);
-  btn.parent(parent);
-  btn.class('preset-button');
+  let btn = createButton(name)
+  btn.parent(parent)
+  btn.class('preset-button')
   btn.mousePressed(() => {
-    applyPreset(params);
+    applyPreset(params)
     
-    // Update UI controls to match preset
     for (let key in params) {
-      if (flowerParams.hasOwnProperty(key) && controls[key]) {
+      if (flowerConfig.hasOwnProperty(key) && controls[key]) {
         controls[key].slider.value(params[key]);
-        controls[key].label.html(controls[key].label.html().split(':')[0] + ': ' + params[key]);
+        controls[key].label.html(controls[key].label.html().split(':')[0] + ': ' + params[key])
       }
     }
     
-    // Apply color mode if specified
     if (params.colorMode) {
-      colorMode1.selected(params.colorMode);
+      colorModeSelector.selected(params.colorMode)
       
-      // Update color picker if custom color is specified
       if (params.customColor && params.colorMode === 'custom') {
-        colorPicker.color(color(customColor.h, customColor.s, customColor.b));
+        colorPicker.color(color(customColor.h, customColor.s, customColor.b))
       }
     }
-  });
+  })
   
-  return btn;
+  return btn
 }
